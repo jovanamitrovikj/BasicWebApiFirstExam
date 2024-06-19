@@ -1,0 +1,64 @@
+The following code is trying to fetch all the .txt files from a given directory and add “ASPEKT” inside them.
+There are some minor bugs in the code. Find them, explain the issue, and how to fix it.
+
+
+
+
+1. 
+Recursive Call Error:
+The recursive call to GetTxtFiles within the foreach loop should pass subDirectory, not directoryPath.
+
+foreach (string subDirectory in subDirectories)
+{
+GetTxtFiles(subDirectory, txtFiles); // Pass subDirectory instead of directoryPath
+}
+
+
+2. 
+StreamWriter  is Not Disposed:
+The StreamWriter is not being disposed of, which can lead to resource leaks. Use a using statement to ensure it's properly disposed of.
+
+and in this context remove the StreamWriter writer = null;
+replace with :
+
+using (StreamWriter writer = File.AppendText(filepath))
+{
+writer.WriteLine(textToAppend);
+} // The writer is automatically disposed of at the end of the using block
+
+
+
+class Program
+{
+static void Main(string[] args)
+{
+string directoryPath = @"Directorypath"; // Correct path
+List<string> txtFiles = new List<string>();
+GetTxtFiles(directoryPath, txtFiles);
+
+foreach (var file in txtFiles)
+{
+AppendTextToFile(file, "ASPEKT");
+}
+}
+
+static void GetTxtFiles(string directoryPath, List<string> txtFiles)
+{
+string[] files = Directory.GetFiles(directoryPath, "*.txt");
+txtFiles.AddRange(files);
+
+string[] subDirectories = Directory.GetDirectories(directoryPath);
+foreach (string subDirectory in subDirectories)
+{
+GetTxtFiles(subDirectory, txtFiles); // Recursive call with correct parameter
+}
+}
+
+static void AppendTextToFile(string filepath, string textToAppend)
+{
+using (StreamWriter writer = File.AppendText(filepath))
+{
+writer.WriteLine(textToAppend);
+}
+}
+}
